@@ -126,6 +126,11 @@ function productHtml(p) {
     `$1${productBodyHtml(p)}$2`
   );
 
+  // --- demote the <noscript> slogan <h1> to <p> (keep one H1 per page) ---
+  html = html.replace(/<noscript>[\s\S]*?<\/noscript>/, (block) =>
+    block.replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/, '<p$1>$2</p>')
+  );
+
   return html;
 }
 
