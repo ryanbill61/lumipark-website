@@ -205,4 +205,31 @@ const catalog = {
   })),
 };
 writeFileSync(join(distDir, "catalog.json"), JSON.stringify(catalog));
-console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap + catalog.json written`);
+
+// --- catalog.md (Dify-knowledge-base-friendly Markdown) ---
+const mdLines = [`# ${SITE_NAME} — Product Catalog`, "", `> ${catalog.totalProducts} products. Generated ${catalog.generatedAt}.`, ""];
+for (const p of catalog.products) {
+  mdLines.push(`## ${p.name}`);
+  mdLines.push(`- Brand: ${p.brand || "-"}`);
+  mdLines.push(`- Category: ${p.category || "-"}`);
+  mdLines.push(`- Product type: ${p.productType || "-"}`);
+  if (p.series) mdLines.push(`- Series: ${p.series}`);
+  mdLines.push(`- URL: ${p.url}`);
+  if (p.description) mdLines.push(`- Description: ${p.description}`);
+  if (p.applications.length) mdLines.push(`- Applications: ${p.applications.join(", ")}`);
+  if (p.certifications.length) mdLines.push(`- Certifications: ${p.certifications.join(", ")}`);
+  if (p.specifications.length) {
+    mdLines.push("", "### Specifications");
+    for (const s of p.specifications) mdLines.push(`- ${s.label}: ${s.value}`);
+  }
+  if (p.skus.length) {
+    mdLines.push("", "### SKUs");
+    for (const s of p.skus) {
+      const bits = [s.sku, s.power && `power ${s.power}`, s.lumens && `${s.lumens}lm`, s.dimensions].filter(Boolean);
+      mdLines.push(`- ${bits.join(" — ")}`);
+    }
+  }
+  mdLines.push("", "---", "");
+}
+writeFileSync(join(distDir, "catalog.md"), mdLines.join("\n"));
+console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap + catalog.json + catalog.md written`);
