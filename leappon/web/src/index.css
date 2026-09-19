@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bone: #ffffff; /* white card surface */
+  --color-bone-2: #faf9f7; /* warm oatmeal background */
+  --color-ink: #2c2a28; /* warm deep gray text */
+  --color-ink-soft: #7a756d; /* warm secondary gray */
+  --color-steel: #8c7861; /* clay / wood brown accent */
+  --color-steel-deep: #73614d; /* brown hover */
+  --color-pine: #8c7861; /* brown */
+  --color-line: #e8e3d8; /* soft border */
+  --font-sans: "Inter", "Helvetica Neue", Arial, "PingFang SC", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #faf9f7;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.rule-top {
+  border-top: 1px solid #e8e3d8;
+}
+
+.rule-bottom {
+  border-bottom: 1px solid #e8e3d8;
+}
+
+/* soft card surface — warm minimalist */
+.card-soft {
+  background-color: #ffffff;
+  border: 1px solid #e8e3d8;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(44, 42, 40, 0.04);
+}
+
+.card-hover {
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(44, 42, 40, 0.08);
+}
+
+/* technical spec table — warm neutral */
+.spec-table th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+  background-color: #faf9f7;
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 2px solid #e8e3d8;
+  white-space: nowrap;
+}
+
+.spec-table td {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid #e8e3d8;
+  vertical-align: top;
+}
+
+.spec-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

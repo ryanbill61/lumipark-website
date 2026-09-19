@@ -1,0 +1,8 @@
+project_id = "f8796d0e-fd61-4eee-b972-18f29b5d2c49"
+
+[server]
+path = "server"
+
+[web]
+path = "web"
+output_path = "web/dist"

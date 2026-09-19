@@ -1,0 +1,1 @@
+import{N as e}from"./dist-CuXusv84.js";var t=`variants`,n={locale:`en-US`,namespace:t,resources:()=>e(()=>import(`./resources-DYz2XFsI-DcIKZnSM.js`),[])};export{n,t};

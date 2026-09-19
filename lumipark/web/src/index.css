@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bone: #ffffff; /* cards, header, nav */
+  --color-bone-2: #f5f8fb; /* sections, placeholders */
+  --color-ink: #0a2e50; /* navy */
+  --color-ink-soft: #5b7089; /* soft slate */
+  --color-steel: #1673d1; /* blue */
+  --color-steel-deep: #0a2e50; /* navy (hover) */
+  --color-pine: #1f9d6c; /* green */
+  --font-sans: "Inter", "Helvetica Neue", Arial, "PingFang SC", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #f5f8fb;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.rule-top {
+  border-top: 1px solid #e0e7ed;
+}
+
+.rule-bottom {
+  border-bottom: 1px solid #e0e7ed;
+}
+
+/* technical spec table — blue-tech engineering feel */
+.spec-table th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+  background-color: #f5f8fb;
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 2px solid #e0e7ed;
+  white-space: nowrap;
+}
+
+.spec-table td {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid #e0e7ed;
+  vertical-align: top;
+}
+
+.spec-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
