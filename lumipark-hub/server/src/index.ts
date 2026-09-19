@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { db, secret, vars } from "edgespark";
 import { and, desc, eq, gte } from "drizzle-orm";
 import { SignJWT, jwtVerify } from "jose";
-import { leads } from "./defs";
+import { leads, leadRate } from "./defs";
 import { installBloomeBridge } from "./bloome-bridge";
 
 const app = new Hono();
@@ -100,8 +100,46 @@ async function sendLeadEmail(lead: { name: string | null; email: string; company
   });
 }
 
+// --- DB-backed rate limiting (shared across edge instances) ---
+async function rateCount(kind: string, ip: string, email: string, windowMs: number): Promise<number> {
+  const cutoff = Date.now() - windowMs;
+  const rows = await db
+    .select({ id: leadRate.id })
+    .from(leadRate)
+    .where(and(eq(leadRate.kind, kind), eq(leadRate.ip, ip), eq(leadRate.email, email), gte(leadRate.createdAt, cutoff)))
+    .limit(100);
+  return rows.length;
+}
+async function rateCountByIp(kind: string, ip: string, windowMs: number): Promise<number> {
+  const cutoff = Date.now() - windowMs;
+  const rows = await db
+    .select({ id: leadRate.id })
+    .from(leadRate)
+    .where(and(eq(leadRate.kind, kind), eq(leadRate.ip, ip), gte(leadRate.createdAt, cutoff)))
+    .limit(100);
+  return rows.length;
+}
+async function sendRateLimitAlert(): Promise<void> {
+  const key = vars.get("RESEND_API_KEY");
+  if (!key) return;
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: `${SITE_NAME} <${FROM_EMAIL}>`,
+        to: [NOTIFY_EMAIL],
+        subject: `⚠️ Inquiry rate limit reached — ${SITE_NAME}`,
+        text: "Inquiry submissions hit the hourly cap (30/hour). New submissions are still recorded, but notification emails are paused for this hour to protect the inbox.",
+      }),
+    });
+  } catch {
+    // alert failure must not break the response
+  }
+}
+
 app.post("/api/public/leads", async (c) => {
-  const ip = c.req.header("CF-Connecting-IP") || c.req.header("x-forwarded-for") || "unknown";
+  const ip = clientIp(c);
 
   let data: Record<string, unknown> = {};
   try {
@@ -110,25 +148,29 @@ app.post("/api/public/leads", async (c) => {
     return c.json({ error: "Invalid JSON" }, 400);
   }
 
-  // Honeypot: real users never fill the hidden "website" field; bots do. Silently swallow.
+  const email = typeof data.email === "string" ? data.email.trim() : "";
+
+  // Record every attempt (rate counter, shared across edge instances).
+  await db.insert(leadRate).values({ kind: "lead", ip, email: email || "invalid" });
+
+  // 1) IP rate limit — first, before honeypot, so honeypot probes also count.
+  if ((await rateCountByIp("lead", ip, 60_000)) > 5) {
+    return c.json({ error: "Too many requests" }, 429);
+  }
+
+  // 2) Honeypot — silent discard (no lead stored, no email sent).
   if (typeof data.website === "string" && data.website.trim()) {
     return c.json({ ok: true, id: 0, emailStatus: "skipped" }, 201);
   }
 
-  const email = typeof data.email === "string" ? data.email.trim() : "";
   if (!email) return c.json({ error: "Email is required" }, 400);
 
-  // DB-backed rate limit: count stored leads from this email in the last 60s (shared across edge instances).
-  const cutoff = Date.now() - 60_000;
-  const recent = await db
-    .select({ id: leads.id })
-    .from(leads)
-    .where(and(eq(leads.email, email), gte(leads.createdAt, cutoff)))
-    .limit(6);
-  if (recent.length >= 5) return c.json({ error: "Too many requests" }, 429);
+  // 3) Email rate limit — second dimension.
+  if ((await rateCount("lead", ip, email, 60_000)) > 5) {
+    return c.json({ error: "Too many requests" }, 429);
+  }
 
   const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
-
   const leadData = {
     name: str(data.name),
     email,
@@ -138,14 +180,30 @@ app.post("/api/public/leads", async (c) => {
     productSlug: str(data.productSlug),
   };
 
+  // 4) Hourly global cap (per site) — 30 leads/hour.
+  const hourCutoff = Date.now() - 3600_000;
+  const hourRows = await db.select({ id: leads.id }).from(leads).where(gte(leads.createdAt, hourCutoff)).limit(31);
+  const capped = hourRows.length >= 30;
+
   let lead;
   try {
     [lead] = await db
       .insert(leads)
-      .values({ brand: "BMC", ...leadData })
+      .values({ brand: "BMC", ip, emailStatus: capped ? "rate_limited" : "pending", ...leadData })
       .returning();
   } catch (e) {
     return c.json({ error: "DB: " + (e instanceof Error ? e.message : String(e)) }, 500);
+  }
+
+  // 5) Email only when NOT capped (prevents flooding owner inbox + auto-reply abuse).
+  if (capped) {
+    const cappedRows = await db
+      .select({ id: leads.id })
+      .from(leads)
+      .where(and(eq(leads.emailStatus, "rate_limited"), gte(leads.createdAt, hourCutoff)))
+      .limit(2);
+    if (cappedRows.length === 1) await sendRateLimitAlert();
+    return c.json({ ok: true, id: lead.id, emailStatus: "rate_limited" }, 201);
   }
 
   const emailResult = await sendLeadEmail(leadData);
@@ -157,7 +215,6 @@ app.post("/api/public/leads", async (c) => {
   } catch {
     // status write-back must not break the response
   }
-
   return c.json({ ok: true, id: lead.id, emailStatus: emailResult.ok ? "sent" : "failed" }, 201);
 });
 
@@ -192,38 +249,30 @@ function clientIp(c: { req: { header: (n: string) => string | undefined } }): st
   return c.req.header("CF-Connecting-IP") || c.req.header("x-forwarded-for") || "unknown";
 }
 
-// In-memory login rate limiting (best-effort; resets on Worker cold start).
-const loginFailMap = new Map<string, { count: number; lockedUntil: number }>();
-
-function loginLocked(ip: string): boolean {
-  const e = loginFailMap.get(ip);
-  return !!e && e.lockedUntil > Date.now();
-}
-function recordLoginFail(ip: string): void {
-  const now = Date.now();
-  const e = loginFailMap.get(ip);
-  if (!e || e.lockedUntil <= now) {
-    loginFailMap.set(ip, { count: 1, lockedUntil: 0 });
-    return;
-  }
-  e.count += 1;
-  if (e.count >= LOGIN_MAX_FAILS) {
-    e.lockedUntil = now + LOGIN_LOCK_MS;
-    e.count = 0;
-  }
+// Admin login rate limiting (DB-backed, shared across edge instances).
+async function loginFailCount(ip: string): Promise<number> {
+  const cutoff = Date.now() - LOGIN_LOCK_MS;
+  const rows = await db
+    .select({ id: leadRate.id })
+    .from(leadRate)
+    .where(and(eq(leadRate.kind, "login"), eq(leadRate.ip, ip), gte(leadRate.createdAt, cutoff)))
+    .limit(100);
+  return rows.length;
 }
 
 app.post("/api/public/admin/login", async (c) => {
   const ip = clientIp(c);
-  if (loginLocked(ip)) return c.json({ ok: false, error: "Too many attempts. Try again later." }, 429);
+  if ((await loginFailCount(ip)) >= LOGIN_MAX_FAILS) {
+    return c.json({ ok: false, error: "Too many attempts. Try again later." }, 429);
+  }
   const body = await c.req.json().catch(() => ({}));
   if (body.username === ADMIN_USERNAME && body.password === adminPassword()) {
-    loginFailMap.delete(ip);
+    await db.delete(leadRate).where(and(eq(leadRate.kind, "login"), eq(leadRate.ip, ip)));
     const token = await signSession();
     c.header("Set-Cookie", setSessionCookie(token, 604800));
     return c.json({ ok: true });
   }
-  recordLoginFail(ip);
+  await db.insert(leadRate).values({ kind: "login", ip, email: "admin" });
   return c.json({ ok: false, error: "Invalid credentials" }, 401);
 });
 

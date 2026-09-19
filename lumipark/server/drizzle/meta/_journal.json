@@ -64,6 +64,13 @@
       "when": 1789826314857,
       "tag": "0008_add_leads_ip",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1789826908574,
+      "tag": "0009_add_lead_rate",
+      "breakpoints": true
     }
   ]
 }

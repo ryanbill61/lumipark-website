@@ -21,3 +21,14 @@ export const leads = sqliteTable("leads", {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
 });
+
+// Rate-limit counter (shared across edge instances): every lead/login attempt rows a record here.
+export const leadRate = sqliteTable("lead_rate", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  kind: text("kind").notNull().default("lead"), // "lead" | "login"
+  ip: text("ip").notNull(),
+  email: text("email").notNull(),
+  createdAt: integer("created_at")
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull(),
+});

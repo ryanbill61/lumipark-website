@@ -29,6 +29,13 @@
       "when": 1789825881035,
       "tag": "0003_elite_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789826908575,
+      "tag": "0004_add_lead_rate",
+      "breakpoints": true
     }
   ]
 }

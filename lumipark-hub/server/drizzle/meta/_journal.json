@@ -29,6 +29,13 @@
       "when": 1789825872748,
       "tag": "0003_illegal_sphinx",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789826908575,
+      "tag": "0004_add_lead_rate",
+      "breakpoints": true
     }
   ]
 }
