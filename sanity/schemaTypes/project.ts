@@ -1,19 +1,19 @@
 import { defineField, defineType } from 'sanity'
 
-export const category = defineType({
-  name: 'category',
-  title: 'Product Categories (产品分类)',
+export const project = defineType({
+  name: 'project',
+  title: 'Projects (Leappon 案例管理)',
   type: 'document',
   fields: [
     defineField({
       name: 'title',
-      title: '分类名称',
+      title: '案例名称',
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'slug',
-      title: '分类 URL 标识 (Slug)',
+      title: '案例 URL 标识 (Slug)',
       type: 'slug',
       options: {
         source: 'title',
@@ -22,8 +22,16 @@ export const category = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'mainImage',
+      title: '案例主图',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    }),
+    defineField({
       name: 'description',
-      title: '分类描述',
+      title: '案例描述',
       type: 'text',
     }),
   ],
