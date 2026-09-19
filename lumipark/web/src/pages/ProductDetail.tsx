@@ -104,6 +104,19 @@ export default function ProductDetail() {
       : "Indoor, outdoor and industrial LED fixtures with full spec tables, IES files and DLC listings.",
   );
 
+  // Soft-404 guard: mark non-existent slugs noindex (client-side; raw-HTML crawlers still see SPA shell).
+  useEffect(() => {
+    const notFound = !loading && (!!error || !product);
+    let meta = document.querySelector('meta[name="robots"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "robots");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", notFound ? "noindex, follow" : "index, follow");
+    if (notFound) document.title = "Product not found — LumiPark Group";
+  }, [loading, error, product]);
+
   if (loading)
     return <div className="max-w-7xl mx-auto px-5 md:px-8 pt-24 text-ink-soft">Loading…</div>;
   if (error || !product)
