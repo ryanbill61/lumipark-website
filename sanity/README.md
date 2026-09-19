@@ -28,8 +28,9 @@
 ## 构建（从源码重建 studio）
 ```bash
 npm install          # 依赖见 package.json（sanity ^6.9.1 / react 19）
-npm run build        # 产出 dist/
+npm run build        # 产出 dist/（index.html + static/）
 # 把 dist/ 内容复制到三站 web/public/studio（覆盖静态挂载）
 ```
 
-> ⚠️ **构建环境要求**：sanity ^6.9.1 要求 **Node.js >= 22.12**（当前沙箱是 v20.20.2，需切 Node 22+ 才能 build）。源码本身可构建，只是环境 Node 版本偏低。
+> ✅ **已验证可重建**：用 Node v22.12.0 跑 `npm run build` 成功（`✔ Build Sanity Studio`），产出 `dist/`（index.html 8735B + static/ 369 文件），与线上 `/studio` 产物一致。
+> ⚠️ 需 **Node.js >= 22.12**（sanity ^6.9.1 硬性要求；沙箱默认 v20.20.2 会报错）。
