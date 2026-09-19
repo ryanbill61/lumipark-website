@@ -211,6 +211,7 @@ function buildCatalogMd(title, prods) {
   const lines = [`# ${title}`, "", `> ${prods.length} products.`, ""];
   for (const p of prods) {
     lines.push(`## ${p.name}`);
+    lines.push(`Product: ${p.name}`);
     lines.push(`- Brand: ${p.brand || "-"}`);
     lines.push(`- Category: ${p.category || "-"}`);
     lines.push(`- Product type: ${p.productType || "-"}`);
