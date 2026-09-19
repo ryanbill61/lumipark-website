@@ -27,10 +27,17 @@
 
 ## 构建（从源码重建 studio）
 ```bash
-npm install          # 依赖见 package.json（sanity ^6.9.1 / react 19）
-npm run build        # 产出 dist/（index.html + static/）
-# 把 dist/ 内容复制到三站 web/public/studio（覆盖静态挂载）
+# 1) 切 Node 22+（沙箱默认 v20.20.2 不够；工作区已备便携版）
+export PATH="$HOME/node22/bin:$PATH"        # 便携版 Node v22.12.0，已在工作区
+node --version                               # 应显示 v22.x
+
+# 2) 安装依赖 + 构建
+npm install
+npm run build                                # 产出 dist/（index.html + static/）
+
+# 3) 部署：把 dist/ 复制到三站 web/public/studio（覆盖静态挂载）
+cp -r dist/* ../../edgespark/{lumipark,lumipark-hub,leappon}/web/public/studio/
 ```
 
-> ✅ **已验证可重建**：用 Node v22.12.0 跑 `npm run build` 成功（`✔ Build Sanity Studio`），产出 `dist/`（index.html 8735B + static/ 369 文件），与线上 `/studio` 产物一致。
-> ⚠️ 需 **Node.js >= 22.12**（sanity ^6.9.1 硬性要求；沙箱默认 v20.20.2 会报错）。
+> ✅ **已验证可重建**：Node v22.12.0 + `npm i && npm run build` 成功（`✔ Build Sanity Studio` ~3s），产出 `dist/`：index.html 8735B + static/ 369 文件 + 总 8.1M，与线上 `/studio` 产物一致。
+> ⚠️ Node 版本硬要求 **>= 22.12**（个别依赖提示 >=22.20，但 22.12 实测构建通过，仅 EBADENGINE 警告）。便携版 Node 在工作区 `~/node22`。
