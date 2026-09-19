@@ -1,7 +1,22 @@
 # LEAPPON
 
 > Warm, human-centred lighting for the modern home — pendants, sconces, desk & floor and ceiling fans.
+> LEAPPON 是 LumiPark Group 旗下设计家居线品牌独立站。
 
-- https://leappon.com/
+## 机器可读数据
+- 产品索引：https://leappon.com/catalog.json
+- 品牌事实表：https://leappon.com/facts.json
+- 品牌事实表（人读）：https://leappon.com/facts.md
+
+## 站点结构
+- LumiPark Group = 母舰 Hub（集团门户）
+- BMC = 商照/工程线 → https://bmclighting.com
+- LEAPPON = 设计家居线 → https://leappon.com
+
+## 关键页面
+- https://leappon.com//
 - https://leappon.com/products
 - https://leappon.com/contact
+
+## 联系方式
+- LEAPPON：ryan@leappon.com

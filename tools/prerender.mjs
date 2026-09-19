@@ -21,7 +21,7 @@ if (!DOMAIN || !SITE_NAME) {
 
 const SANITY_PROJECT = "e5lza2t9";
 const brandFilter = BRAND ? ` && brand->name == "${BRAND}"` : "";
-const query = `*[_type=="product"${brandFilter}] | order(hubRank asc, _createdAt asc){title, "slug": slug.current, description, tagline, productType, "specs": specifications[]{label,value}, "skus": variants[].modelNumber, "img": mainImage.asset->url, "brandName": brand->name, _updatedAt}`;
+const query = `*[_type=="product"${brandFilter}] | order(hubRank asc, _createdAt asc){title, "slug": slug.current, description, tagline, productType, "category": category->title, "specs": specifications[]{label,value}, features, applications, warranty, "variants": variants[]{modelNumber, variantName, sku, powerSize, luminousFlux, efficacy, dimensions, inStock}, "img": mainImage.asset->url, "galleryImgs": gallery[].asset->url, "specSheetUrl": specSheet.asset->url, "installManualUrl": installManual.asset->url, "iesUrl": iesFile.asset->url, "cutSheetUrl": cutSheet.asset->url, "brandName": brand->name, hubSection, hubRank, seoTitle, seoKeywords, _updatedAt}`;
 const url = `https://${SANITY_PROJECT}.api.sanity.io/v2021-06-07/data/query/production?query=${encodeURIComponent(query)}`;
 const res = await fetch(url);
 const data = await res.json();
@@ -63,7 +63,7 @@ function productBodyHtml(p) {
 
 function productJsonLd(p) {
   const canonical = `https://${DOMAIN}/products/${p.slug}/`;
-  const sku = (p.skus || [])[0] || undefined;
+  const sku = (p.variants || []).map((v) => v.sku || v.modelNumber).filter(Boolean)[0] || undefined;
   const product = {
     "@type": "Product",
     name: p.title,
@@ -155,4 +155,54 @@ writeFileSync(
   join(distDir, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`
 );
-console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap written`);
+
+// --- catalog.json (AI-readable product index) ---
+function certifications(p) {
+  const certs = new Set();
+  const hay = [
+    ...(p.features || []),
+    ...(p.specs || []).map((s) => `${s.label} ${s.value}`),
+    p.warranty || "",
+  ].join(" ");
+  for (const c of ["UL", "ETL", "DLC", "Energy Star", "CE", "cUL", "RoHS", "IP65", "IP66"]) {
+    if (hay.toUpperCase().includes(c.toUpperCase())) certs.add(c);
+  }
+  return [...certs];
+}
+const catalog = {
+  site: SITE_NAME,
+  domain: DOMAIN,
+  generatedAt: new Date().toISOString(),
+  totalProducts: products.length,
+  products: products.map((p) => ({
+    slug: p.slug,
+    url: `https://${DOMAIN}/products/${p.slug}/`,
+    name: p.title,
+    series: (p.title.match(/^(\d+\s*[Ss]eries)/) || [])[1] || null,
+    brand: p.brandName || null,
+    category: p.category || null,
+    productType: p.productType || null,
+    description: plain(p.description || p.tagline || "") || null,
+    features: p.features || [],
+    applications: p.applications || [],
+    specifications: p.specs || [],
+    skus: (p.variants || []).map((v) => ({
+      sku: v.sku || v.modelNumber || null,
+      model: v.modelNumber || null,
+      name: v.variantName || null,
+      power: v.powerSize || null,
+      lumens: v.luminousFlux || null,
+      efficacy: v.efficacy || null,
+      dimensions: v.dimensions || null,
+      inStock: v.inStock ?? null,
+    })),
+    images: [p.img, ...(p.galleryImgs || [])].filter(Boolean),
+    specSheetUrl: p.specSheetUrl || null,
+    installManualUrl: p.installManualUrl || null,
+    iesUrl: p.iesUrl || null,
+    cutSheetUrl: p.cutSheetUrl || null,
+    certifications: certifications(p),
+  })),
+};
+writeFileSync(join(distDir, "catalog.json"), JSON.stringify(catalog));
+console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap + catalog.json written`);

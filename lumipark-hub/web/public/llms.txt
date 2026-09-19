@@ -1,10 +1,25 @@
 # BMC Lighting
 
 > Precision commercial & industrial lighting — magnetic track, floodlight, grille and linear systems.
+> BMC 是 LumiPark Group 旗下商照/工程线品牌独立站。
 
-- https://bmclighting.com/
+## 机器可读数据
+- 产品索引：https://bmclighting.com/catalog.json
+- 品牌事实表：https://bmclighting.com/facts.json
+- 品牌事实表（人读）：https://bmclighting.com/facts.md
+
+## 站点结构
+- LumiPark Group = 母舰 Hub（集团门户）
+- BMC = 商照/工程线 → https://bmclighting.com
+- LEAPPON = 设计家居线 → https://leappon.com
+
+## 关键页面
+- https://bmclighting.com//
 - https://bmclighting.com/products
 - https://bmclighting.com/ecosystem
 - https://bmclighting.com/oem-odm
 - https://bmclighting.com/technical
 - https://bmclighting.com/contact
+
+## 联系方式
+- BMC Lighting：monica@bmclighting.com

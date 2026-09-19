@@ -1,10 +1,25 @@
 # LumiPark Group
 
 > Lighting supply chain partner — three specialized industrial parks, in-house manufacturing, OEM/ODM.
+> 母舰 Hub（集团门户）：汇总集团实力 + 品牌分流 + 集团询盘。
 
-- https://lumiparkgroup.com/
+## 机器可读数据
+- 产品索引：https://lumiparkgroup.com/catalog.json
+- 品牌事实表：https://lumiparkgroup.com/facts.json
+- 品牌事实表（人读）：https://lumiparkgroup.com/facts.md
+
+## 站点结构
+- LumiPark Group = 母舰 Hub（集团门户）
+- BMC = 商照/工程线 → https://bmclighting.com
+- LEAPPON = 设计家居线 → https://leappon.com
+
+## 关键页面
+- https://lumiparkgroup.com//
 - https://lumiparkgroup.com/products
 - https://lumiparkgroup.com/ecosystem
 - https://lumiparkgroup.com/oem-odm
 - https://lumiparkgroup.com/technical
 - https://lumiparkgroup.com/contact
+
+## 联系方式
+- LumiPark Group：ryan@lumiparkgroup.com

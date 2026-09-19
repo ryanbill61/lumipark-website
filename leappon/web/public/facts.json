@@ -1,0 +1,76 @@
+{
+  "site": "LEAPPON",
+  "domain": "leappon.com",
+  "role": "LEAPPON 设计家居线独立站",
+  "group": {
+    "name": "LumiPark Group",
+    "parks": 3,
+    "area_sqm": 100000,
+    "factories": "50+",
+    "years": "30+"
+  },
+  "brands": [
+    {
+      "name": "BMC",
+      "positioning": "商照 / 工程线",
+      "products": [
+        "磁吸轨道",
+        "筒灯射灯",
+        "格栅灯",
+        "线性灯"
+      ],
+      "site": "bmclighting.com",
+      "email": "monica@bmclighting.com"
+    },
+    {
+      "name": "LEAPPON",
+      "positioning": "设计家居线（C 端/设计师）",
+      "products": [
+        "吊灯",
+        "壁灯",
+        "台灯落地灯",
+        "风扇灯"
+      ],
+      "site": "leappon.com",
+      "email": "ryan@leappon.com"
+    }
+  ],
+  "certifications": {
+    "confirmed": [
+      "UL",
+      "ETL",
+      "DLC",
+      "CE"
+    ],
+    "todo": "认证编号/范围/原文"
+  },
+  "oem_odm": {
+    "capable": true,
+    "todo": "能力描述/案例/打样流程"
+  },
+  "contact": {
+    "hub": "ryan@lumiparkgroup.com",
+    "bmc": "monica@bmclighting.com",
+    "leappon": "ryan@leappon.com"
+  },
+  "business": {
+    "moq": "100–500 units",
+    "warranty": "5-year standard",
+    "incoterms": [
+      "EXW",
+      "FOB",
+      "CIF",
+      "DDP"
+    ],
+    "testing": [
+      "LM-79",
+      "LM-80"
+    ]
+  },
+  "todo": [
+    "交期（lead time）",
+    "认证编号/范围/原文",
+    "年产能/研发中心与工程师数/园区地址",
+    "打样流程/政策/案例"
+  ]
+}
