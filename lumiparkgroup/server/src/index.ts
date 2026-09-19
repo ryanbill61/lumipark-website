@@ -383,4 +383,56 @@ app.get("/api/public/sanity", async (c) => {
   return c.json(data);
 });
 
+// --- Dify chatbot proxy ---
+const DIFY_BASE = "https://api.dify.ai/v1";
+
+app.get("/api/public/dify/health", (c) => {
+  return c.json({ enabled: !!vars.get("DIFY_API_KEY") });
+});
+
+app.post("/api/public/dify/chat", async (c) => {
+  const key = vars.get("DIFY_API_KEY");
+  if (!key) return c.json({ enabled: false }, 503);
+
+  const ip = clientIp(c);
+  // Anti-abuse: 30 calls/hour/IP.
+  if ((await rateCountByIp(`dify:${SITE_RATE_KEY}`, ip, 3600_000)) >= 30) {
+    return c.json({ error: "Too many requests" }, 429);
+  }
+  await db.insert(leadRate).values({ kind: `dify:${SITE_RATE_KEY}`, ip, email: "dify" });
+
+  let body: Record<string, unknown> = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Invalid JSON" }, 400);
+  }
+  const query = typeof body.query === "string" ? body.query.trim() : "";
+  if (!query) return c.json({ error: "Query required" }, 400);
+  const productSlug = typeof body.productSlug === "string" ? body.productSlug : "";
+  const conversationId = typeof body.conversationId === "string" ? body.conversationId : "";
+
+  try {
+    const res = await fetch(`${DIFY_BASE}/chat-messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        inputs: { site: SITE_RATE_KEY, productSlug },
+        query,
+        response_mode: "blocking",
+        user: `web-${ip}`,
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return c.json({ error: `Dify ${res.status}: ${text.slice(0, 200)}` }, 502);
+    }
+    const json = (await res.json()) as { answer?: string; conversation_id?: string; message_id?: string };
+    return c.json({ answer: json.answer || "", conversationId: json.conversation_id || "", messageId: json.message_id || "" });
+  } catch (e) {
+    return c.json({ error: e instanceof Error ? e.message : "Dify error" }, 502);
+  }
+});
+
 export default app;

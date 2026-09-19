@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import Logo from "@/components/Logo";
+import DifyChat from "@/components/DifyChat";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -138,6 +139,7 @@ export default function Layout() {
           </div>
         </div>
       </footer>
+      <DifyChat />
     </div>
   );
 }
