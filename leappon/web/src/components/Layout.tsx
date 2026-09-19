@@ -1,34 +1,37 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import Logo from "@/components/Logo";
+import DifyChat from "@/components/DifyChat";
 
 const NAV = [
   { to: "/", label: "Home" },
-  { to: "/products", label: "Collections" },
+  { to: "/ecosystem", label: "Our Ecosystem" },
+  { to: "/products", label: "Products" },
+  { to: "/oem-odm", label: "OEM / ODM" },
+  { to: "/technical", label: "Technical" },
   { to: "/contact", label: "Contact" },
 ];
 
 function navClass({ isActive }: { isActive: boolean }) {
   return isActive
-    ? "text-steel border-b border-steel pb-0.5"
-    : "text-ink-soft hover:text-steel transition-colors";
+    ? "text-ink border-b border-ink pb-0.5"
+    : "text-ink-soft hover:text-ink transition-colors";
 }
 
 export default function Layout() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-bone-2">
-      {/* Back-link to LumiPark Group hub */}
-      <a
-        href="https://lumiparkgroup.com"
-        className="block bg-ink text-bone text-center text-xs py-1.5 px-5 uppercase tracking-[0.14em] hover:opacity-90"
-      >
-        ← LumiPark Group — All Brands &amp; Manufacturing
-      </a>
+    <div className="min-h-screen flex flex-col">
+      {/* Site-wide top trust strip */}
+      <div className="border-b border-ink/10 bg-bone-2">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-2 text-center text-xs uppercase tracking-[0.14em] text-ink">
+          UL · ETL · DLC Listed Lines ｜ ISO 9001:2015 Certified Facilities
+        </div>
+      </div>
 
       <header className="sticky top-0 z-40 bg-bone/90 backdrop-blur rule-bottom">
-        <div className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center" onClick={() => setOpen(false)}>
             <Logo />
           </Link>
@@ -41,9 +44,9 @@ export default function Layout() {
             ))}
             <Link
               to="/contact"
-              className="bg-steel text-white px-5 py-2.5 text-sm font-medium rounded-full hover:bg-steel-deep transition-colors"
+              className="bg-steel text-white px-4 py-2 text-sm font-medium hover:bg-steel-deep transition-colors"
             >
-              Contact
+              Request a Quote
             </Link>
           </nav>
 
@@ -52,7 +55,7 @@ export default function Layout() {
             aria-label="Toggle menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden w-11 h-11 flex flex-col items-center justify-center gap-1.5 border border-ink/20 rounded-xl"
+            className="md:hidden w-11 h-11 flex flex-col items-center justify-center gap-1.5 border border-ink/20"
           >
             <span className={`block w-5 h-px bg-ink transition-transform ${open ? "translate-y-[3.5px] rotate-45" : ""}`} />
             <span className={`block w-5 h-px bg-ink transition-opacity ${open ? "opacity-0" : ""}`} />
@@ -76,9 +79,9 @@ export default function Layout() {
               <Link
                 to="/contact"
                 onClick={() => setOpen(false)}
-                className="mt-4 mb-2 bg-steel text-white text-center px-4 py-3 text-sm font-medium rounded-full"
+                className="mt-4 mb-2 bg-steel text-white text-center px-4 py-3 text-sm font-medium"
               >
-                Contact
+                Request a Quote
               </Link>
             </div>
           </nav>
@@ -90,16 +93,16 @@ export default function Layout() {
       </main>
 
       <footer className="bg-ink text-bone mt-24">
-        <div className="max-w-6xl mx-auto px-5 md:px-8 py-14 grid grid-cols-2 md:grid-cols-3 gap-10 text-sm">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-14 grid grid-cols-2 md:grid-cols-4 gap-10 text-sm">
           <div className="col-span-2 md:col-span-1">
             <div className="mb-3">
               <Logo light />
             </div>
             <p className="text-bone/60 leading-relaxed">
-              Warm, human-centred lighting for the modern home — pendants,
-              sconces, desk &amp; floor and ceiling fans.
+              Your complete lighting supply chain partner — three specialized industrial parks,
+              in-house manufacturing, North America-grade quality.
             </p>
-            <p className="text-bone/40 text-xs mt-3">LEAPPON is a brand of LumiPark Group.</p>
+            <p className="text-bone/40 text-xs mt-3">LEAPPON and BMC are brands of LumiPark Group.</p>
           </div>
           <div>
             <div className="text-bone/50 uppercase tracking-[0.18em] text-xs mb-3">Site</div>
@@ -112,6 +115,15 @@ export default function Layout() {
             </ul>
           </div>
           <div>
+            <div className="text-bone/50 uppercase tracking-[0.18em] text-xs mb-3">Certifications</div>
+            <ul className="space-y-2 text-bone/80">
+              <li>UL 1598 / 8750</li>
+              <li>ETL · DLC · Energy Star</li>
+              <li>FCC · RoHS</li>
+              <li>ISO 9001 · LM-79/80</li>
+            </ul>
+          </div>
+          <div>
             <div className="text-bone/50 uppercase tracking-[0.18em] text-xs mb-3">Owner</div>
             <ul className="space-y-2 text-bone/80">
               <li>
@@ -121,12 +133,13 @@ export default function Layout() {
           </div>
         </div>
         <div className="rule-top border-bone/15">
-          <div className="max-w-6xl mx-auto px-5 md:px-8 py-5 text-xs text-bone/50 flex justify-between">
-            <span>© {new Date().getFullYear()} LEAPPON. A LumiPark Group Brand.</span>
-            <span>Lighting for Living</span>
+          <div className="max-w-7xl mx-auto px-5 md:px-8 py-5 text-xs text-bone/50 flex justify-between">
+            <span>© {new Date().getFullYear()} LumiPark Group</span>
+            <span>Supply Chain Owner · 3 Industrial Parks · In-House Manufacturing</span>
           </div>
         </div>
       </footer>
+      <DifyChat />
     </div>
   );
 }

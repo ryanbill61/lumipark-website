@@ -16,7 +16,7 @@ const SITE_NAME = "LumiPark Group";
 const FROM_EMAIL = "ryan@lumiparkgroup.com";
 // Real inbox that receives the internal notification.
 const NOTIFY_EMAIL = "ryan@lumiparkgroup.com";
-const SITE_RATE_KEY = "hub"; // per-site rate-limit dimension
+const SITE_RATE_KEY: string = "hub"; // per-site rate-limit dimension
 const SESSION_COOKIE = "admin_session";
 
 function adminPassword(): string {
@@ -450,9 +450,15 @@ app.post("/api/public/dify/chat", async (c) => {
 
   // PDP context: inject the product's authoritative data directly into the prompt (not reliant on KB retrieval).
   const productContext = productSlug ? await productContextFor(productSlug) : "";
+  const brandHint =
+    SITE_RATE_KEY === "bmc"
+      ? "You are on the BMC Lighting website (commercial/industrial lighting). Focus on BMC products; do not mention LEAPPON home/decorative lighting."
+      : SITE_RATE_KEY === "leappon"
+        ? "You are on the LEAPPON website (decorative home lighting). Focus on LEAPPON products; do not mention BMC commercial lighting."
+        : "You are on the LumiPark Group hub — you may cover both BMC and LEAPPON.";
   const fullQuery = productContext
-    ? `Product data for the current page (authoritative — answer using it, do not say you lack the specs):\n${productContext}\n\nUser question: ${query}`
-    : query;
+    ? `Product data for the current page (authoritative — answer using it, do not say you lack the specs):\n${productContext}\n\n${brandHint}\n\nUser question: ${query}`
+    : `${brandHint}\n\nUser question: ${query}`;
 
   try {
     const res = await fetch(`${DIFY_BASE}/chat-messages`, {

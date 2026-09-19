@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import Logo from "@/components/Logo";
+import DifyChat from "@/components/DifyChat";
 
 const NAV = [
   { to: "/", label: "Home" },
+  { to: "/ecosystem", label: "Our Ecosystem" },
   { to: "/products", label: "Products" },
+  { to: "/oem-odm", label: "OEM / ODM" },
   { to: "/technical", label: "Technical" },
-  { to: "/contact", label: "Request a Quote" },
+  { to: "/contact", label: "Contact" },
 ];
 
 function navClass({ isActive }: { isActive: boolean }) {
   return isActive
-    ? "text-steel border-b border-steel pb-0.5"
-    : "text-ink-soft hover:text-steel transition-colors";
+    ? "text-ink border-b border-ink pb-0.5"
+    : "text-ink-soft hover:text-ink transition-colors";
 }
 
 export default function Layout() {
@@ -20,17 +23,10 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Back-link to LumiPark Group hub */}
-      <a
-        href="https://useful-hawk-7978.youware.pro"
-        className="block bg-ink text-bone text-center text-xs py-1.5 px-5 uppercase tracking-[0.14em] hover:opacity-90"
-      >
-        ← LumiPark Group — All Brands &amp; Manufacturing
-      </a>
       {/* Site-wide top trust strip */}
       <div className="border-b border-ink/10 bg-bone-2">
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-2 text-center text-xs uppercase tracking-[0.14em] text-ink">
-          UL · ETL · CE Certified
+          UL · ETL · DLC Listed Lines ｜ ISO 9001:2015 Certified Facilities
         </div>
       </div>
 
@@ -121,9 +117,10 @@ export default function Layout() {
           <div>
             <div className="text-bone/50 uppercase tracking-[0.18em] text-xs mb-3">Certifications</div>
             <ul className="space-y-2 text-bone/80">
-              <li>UL</li>
-              <li>CE</li>
-              <li>ETL</li>
+              <li>UL 1598 / 8750</li>
+              <li>ETL · DLC · Energy Star</li>
+              <li>FCC · RoHS</li>
+              <li>ISO 9001 · LM-79/80</li>
             </ul>
           </div>
           <div>
@@ -137,11 +134,12 @@ export default function Layout() {
         </div>
         <div className="rule-top border-bone/15">
           <div className="max-w-7xl mx-auto px-5 md:px-8 py-5 text-xs text-bone/50 flex justify-between">
-            <span>© {new Date().getFullYear()} BMC Lighting. A LumiPark Group Brand.</span>
+            <span>© {new Date().getFullYear()} LumiPark Group</span>
             <span>Supply Chain Owner · 3 Industrial Parks · In-House Manufacturing</span>
           </div>
         </div>
       </footer>
+      <DifyChat />
     </div>
   );
 }
