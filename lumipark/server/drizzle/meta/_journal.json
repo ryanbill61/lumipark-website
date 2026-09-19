@@ -57,6 +57,13 @@
       "when": 1789578651668,
       "tag": "0007_add_email_status",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1789826314857,
+      "tag": "0008_add_leads_ip",
+      "breakpoints": true
     }
   ]
 }

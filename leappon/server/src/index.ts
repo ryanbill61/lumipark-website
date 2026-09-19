@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { db, secret, vars } from "edgespark";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { SignJWT, jwtVerify } from "jose";
 import { leads } from "./defs";
 import { installBloomeBridge } from "./bloome-bridge";
@@ -102,7 +102,6 @@ async function sendLeadEmail(lead: { name: string | null; email: string; company
 
 app.post("/api/public/leads", async (c) => {
   const ip = c.req.header("CF-Connecting-IP") || c.req.header("x-forwarded-for") || "unknown";
-  if (leadRateLimited(ip)) return c.json({ error: "Too many requests" }, 429);
 
   let data: Record<string, unknown> = {};
   try {
@@ -118,6 +117,15 @@ app.post("/api/public/leads", async (c) => {
 
   const email = typeof data.email === "string" ? data.email.trim() : "";
   if (!email) return c.json({ error: "Email is required" }, 400);
+
+  // DB-backed rate limit: count stored leads from this email in the last 60s (shared across edge instances).
+  const cutoff = Date.now() - 60_000;
+  const recent = await db
+    .select({ id: leads.id })
+    .from(leads)
+    .where(and(eq(leads.email, email), gte(leads.createdAt, cutoff)))
+    .limit(6);
+  if (recent.length >= 5) return c.json({ error: "Too many requests" }, 429);
 
   const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 
@@ -287,18 +295,8 @@ function rateLimited(ip: string): boolean {
   return e.count > RATE_MAX;
 }
 
-// Lead submissions: tighter per-IP limit to slow spam.
-const leadRateMap = new Map<string, { count: number; reset: number }>();
-function leadRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const e = leadRateMap.get(ip);
-  if (!e || e.reset < now) {
-    leadRateMap.set(ip, { count: 1, reset: now + 60_000 });
-    return false;
-  }
-  e.count += 1;
-  return e.count > 5; // max 5 leads/min/IP
-}
+// Lead submissions rate limit is DB-backed (see /api/public/leads) — in-memory maps don't
+// share across EdgeSpark's edge instances.
 
 app.get("/api/public/sanity", async (c) => {
   const ip = c.req.header("CF-Connecting-IP") || c.req.header("x-forwarded-for") || "unknown";

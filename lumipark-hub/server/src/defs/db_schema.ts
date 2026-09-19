@@ -16,6 +16,7 @@ export const leads = sqliteTable("leads", {
   productSlug: text("product_slug"),
   emailStatus: text("email_status"),
   emailError: text("email_error"),
+  ip: text("ip"),
   createdAt: integer("created_at")
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
