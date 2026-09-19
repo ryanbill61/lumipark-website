@@ -101,11 +101,19 @@ async function sendLeadEmail(lead: { name: string | null; email: string; company
 }
 
 app.post("/api/public/leads", async (c) => {
+  const ip = c.req.header("CF-Connecting-IP") || c.req.header("x-forwarded-for") || "unknown";
+  if (leadRateLimited(ip)) return c.json({ error: "Too many requests" }, 429);
+
   let data: Record<string, unknown> = {};
   try {
     data = await c.req.json();
   } catch {
     return c.json({ error: "Invalid JSON" }, 400);
+  }
+
+  // Honeypot: real users never fill the hidden "website" field; bots do. Silently swallow.
+  if (typeof data.website === "string" && data.website.trim()) {
+    return c.json({ ok: true, id: 0, emailStatus: "skipped" }, 201);
   }
 
   const email = typeof data.email === "string" ? data.email.trim() : "";
@@ -277,6 +285,19 @@ function rateLimited(ip: string): boolean {
   }
   e.count += 1;
   return e.count > RATE_MAX;
+}
+
+// Lead submissions: tighter per-IP limit to slow spam.
+const leadRateMap = new Map<string, { count: number; reset: number }>();
+function leadRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const e = leadRateMap.get(ip);
+  if (!e || e.reset < now) {
+    leadRateMap.set(ip, { count: 1, reset: now + 60_000 });
+    return false;
+  }
+  e.count += 1;
+  return e.count > 5; // max 5 leads/min/IP
 }
 
 app.get("/api/public/sanity", async (c) => {

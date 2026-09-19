@@ -82,7 +82,7 @@ export default function ProductDetail() {
 
   // download modal state
   const [dlItem, setDlItem] = useState<{ label: string; cta: string; file: string | null } | null>(null);
-  const [dlForm, setDlForm] = useState({ name: "", company: "", email: "" });
+  const [dlForm, setDlForm] = useState({ name: "", company: "", email: "", website: "" });
   const [dlStatus, setDlStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [dlError, setDlError] = useState("");
 
@@ -169,6 +169,7 @@ export default function ProductDetail() {
           company: dlForm.company,
           message: `Download request: ${dlItem.label} — ${product!.title}`,
           productSlug: product!.slug,
+          website: dlForm.website || "",
         }),
       });
       ok = res.ok;
@@ -514,6 +515,17 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 {dlError && <p className="mt-3 text-sm text-red-700">{dlError}</p>}
+                {/* Honeypot: hidden field bots fill, humans don't. */}
+                <input
+                  type="text"
+                  name="website"
+                  value={dlForm.website}
+                  onChange={(e) => setDlForm((f) => ({ ...f, website: e.target.value }))}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ position: "absolute", left: "-9999px", height: 0, width: 0, opacity: 0 }}
+                />
                 <button
                   type="submit"
                   disabled={dlStatus === "submitting"}

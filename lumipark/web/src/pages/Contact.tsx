@@ -82,6 +82,7 @@ export default function Contact() {
           company: form.company,
           message,
           productSlug,
+          website: form.website || "",
         }),
       });
       ok = res.ok;
@@ -191,6 +192,17 @@ export default function Contact() {
             />
           </div>
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
+          {/* Honeypot: hidden field bots fill, humans don't. */}
+          <input
+            type="text"
+            name="website"
+            value={form.website || ""}
+            onChange={(e) => update("website", e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", height: 0, width: 0, opacity: 0 }}
+          />
           <button
             type="submit"
             disabled={status === "submitting"}
