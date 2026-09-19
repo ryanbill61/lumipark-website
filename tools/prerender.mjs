@@ -207,29 +207,44 @@ const catalog = {
 writeFileSync(join(distDir, "catalog.json"), JSON.stringify(catalog));
 
 // --- catalog.md (Dify-knowledge-base-friendly Markdown) ---
-const mdLines = [`# ${SITE_NAME} — Product Catalog`, "", `> ${catalog.totalProducts} products. Generated ${catalog.generatedAt}.`, ""];
-for (const p of catalog.products) {
-  mdLines.push(`## ${p.name}`);
-  mdLines.push(`- Brand: ${p.brand || "-"}`);
-  mdLines.push(`- Category: ${p.category || "-"}`);
-  mdLines.push(`- Product type: ${p.productType || "-"}`);
-  if (p.series) mdLines.push(`- Series: ${p.series}`);
-  mdLines.push(`- URL: ${p.url}`);
-  if (p.description) mdLines.push(`- Description: ${p.description}`);
-  if (p.applications.length) mdLines.push(`- Applications: ${p.applications.join(", ")}`);
-  if (p.certifications.length) mdLines.push(`- Certifications: ${p.certifications.join(", ")}`);
-  if (p.specifications.length) {
-    mdLines.push("", "### Specifications");
-    for (const s of p.specifications) mdLines.push(`- ${s.label}: ${s.value}`);
-  }
-  if (p.skus.length) {
-    mdLines.push("", "### SKUs");
-    for (const s of p.skus) {
-      const bits = [s.sku, s.power && `power ${s.power}`, s.lumens && `${s.lumens}lm`, s.dimensions].filter(Boolean);
-      mdLines.push(`- ${bits.join(" — ")}`);
+function buildCatalogMd(title, prods) {
+  const lines = [`# ${title}`, "", `> ${prods.length} products.`, ""];
+  for (const p of prods) {
+    lines.push(`## ${p.name}`);
+    lines.push(`- Brand: ${p.brand || "-"}`);
+    lines.push(`- Category: ${p.category || "-"}`);
+    lines.push(`- Product type: ${p.productType || "-"}`);
+    if (p.series) lines.push(`- Series: ${p.series}`);
+    lines.push(`- URL: ${p.url}`);
+    if (p.description) lines.push(`- Description: ${p.description}`);
+    if (p.applications.length) lines.push(`- Applications: ${p.applications.join(", ")}`);
+    if (p.certifications.length) lines.push(`- Certifications: ${p.certifications.join(", ")}`);
+    if (p.specifications.length) {
+      lines.push("", "### Specifications");
+      for (const s of p.specifications) lines.push(`- ${s.label}: ${s.value}`);
     }
+    if (p.skus.length) {
+      lines.push("", "### SKUs");
+      for (const s of p.skus) {
+        const bits = [s.sku, s.power && `power ${s.power}`, s.lumens && `${s.lumens}lm`, s.dimensions].filter(Boolean);
+        lines.push(`- ${bits.join(" — ")}`);
+      }
+    }
+    lines.push("", "---", "");
   }
-  mdLines.push("", "---", "");
+  return lines.join("\n");
 }
-writeFileSync(join(distDir, "catalog.md"), mdLines.join("\n"));
-console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap + catalog.json + catalog.md written`);
+writeFileSync(join(distDir, "catalog.md"), buildCatalogMd(`${SITE_NAME} — Product Catalog`, catalog.products));
+
+// Per-brand splits (smaller docs → better KB retrieval).
+const brandCounts = new Map();
+for (const p of catalog.products) {
+  const b = p.brand || "Other";
+  brandCounts.set(b, (brandCounts.get(b) || 0) + 1);
+}
+for (const [brand, count] of brandCounts) {
+  const bprods = catalog.products.filter((p) => (p.brand || "Other") === brand);
+  const fname = `catalog-${brand.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.md`;
+  writeFileSync(join(distDir, fname), buildCatalogMd(`${SITE_NAME} — ${brand} Catalog`, bprods));
+}
+console.log(`[prerender] ${DOMAIN}: ${written} products + sitemap + catalog.json + catalog.md (+${brandCounts.size} brand splits) written`);

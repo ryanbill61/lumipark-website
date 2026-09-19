@@ -386,6 +386,42 @@ app.get("/api/public/sanity", async (c) => {
 // --- Dify chatbot proxy ---
 const DIFY_BASE = "https://api.dify.ai/v1";
 
+// Fetch a single product's authoritative context from Sanity for PDP question answering.
+async function productContextFor(slug: string): Promise<string> {
+  const query = `*[_type == "product" && slug.current == ${JSON.stringify(slug)}][0] ${SANITY_PROJECTION}`;
+  const url = `https://e5lza2t9.api.sanity.io/v2021-06-07/data/query/production?query=${encodeURIComponent(query)}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return "";
+    const json = (await res.json()) as { result?: Record<string, unknown> | null };
+    const p = json.result;
+    if (!p) return "";
+    const bits: string[] = [
+      `Product: ${p.title}`,
+      p.brand ? `Brand: ${p.brand}` : "",
+      p.category ? `Category: ${p.category}` : "",
+      p.productType ? `Product type: ${p.productType}` : "",
+      p.description ? `Description: ${String(p.description).slice(0, 400)}` : "",
+    ].filter(Boolean);
+    const specs = p.specifications as Array<{ label?: string; value?: string }> | undefined;
+    if (Array.isArray(specs) && specs.length) {
+      bits.push("Specifications: " + specs.map((s) => `${s.label}: ${s.value}`).join("; "));
+    }
+    const variants = p.variants as Array<Record<string, unknown>> | undefined;
+    if (Array.isArray(variants) && variants.length) {
+      bits.push(
+        "Models/SKUs: " +
+          variants
+            .map((v) => [v.sku, v.power && `power ${v.power}`, v.lumens && `${v.lumens}lm`, v.efficacy && `efficacy ${v.efficacy}`, v.dimensions].filter(Boolean).join(" — "))
+            .join(" | ")
+      );
+    }
+    return bits.join("\n");
+  } catch {
+    return "";
+  }
+}
+
 app.get("/api/public/dify/health", (c) => {
   return c.json({ enabled: !!vars.get("DIFY_API_KEY") });
 });
@@ -412,14 +448,20 @@ app.post("/api/public/dify/chat", async (c) => {
   const productSlug = typeof body.productSlug === "string" ? body.productSlug : "";
   const conversationId = typeof body.conversationId === "string" ? body.conversationId : "";
 
+  // PDP context: inject the product's authoritative data directly into the prompt (not reliant on KB retrieval).
+  const productContext = productSlug ? await productContextFor(productSlug) : "";
+  const fullQuery = productContext
+    ? `Product data for the current page (authoritative — answer using it, do not say you lack the specs):\n${productContext}\n\nUser question: ${query}`
+    : query;
+
   try {
     const res = await fetch(`${DIFY_BASE}/chat-messages`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        inputs: { site: SITE_RATE_KEY, productSlug },
-        query,
-        response_mode: "blocking",
+        inputs: { site: SITE_RATE_KEY, productSlug, productContext },
+        query: fullQuery,
+        response_mode: "streaming",
         user: `web-${ip}`,
         ...(conversationId ? { conversation_id: conversationId } : {}),
       }),
@@ -428,8 +470,30 @@ app.post("/api/public/dify/chat", async (c) => {
       const text = await res.text().catch(() => "");
       return c.json({ error: `Dify ${res.status}: ${text.slice(0, 200)}` }, 502);
     }
-    const json = (await res.json()) as { answer?: string; conversation_id?: string; message_id?: string };
-    return c.json({ answer: json.answer || "", conversationId: json.conversation_id || "", messageId: json.message_id || "" });
+
+    // Parse SSE stream (Agent apps only support streaming response_mode).
+    const raw = await res.text();
+    let answer = "";
+    let convId = conversationId;
+    let msgId = "";
+    for (const line of raw.split("\n")) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload) continue;
+      try {
+        const evt = JSON.parse(payload) as { event?: string; answer?: string; message?: string; conversation_id?: string; message_id?: string };
+        if (evt.event === "message") answer += evt.answer || "";
+        else if (evt.event === "message_end") {
+          convId = evt.conversation_id || convId;
+          msgId = evt.message_id || "";
+        } else if (evt.event === "error") {
+          return c.json({ error: evt.message || "Dify error" }, 502);
+        }
+      } catch {
+        // ignore malformed SSE frames
+      }
+    }
+    return c.json({ answer, conversationId: convId, messageId: msgId });
   } catch (e) {
     return c.json({ error: e instanceof Error ? e.message : "Dify error" }, 502);
   }
