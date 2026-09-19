@@ -218,8 +218,10 @@ function buildCatalogMd(title, prods) {
     if (p.series) lines.push(`- Series: ${p.series}`);
     lines.push(`- URL: ${p.url}`);
     if (p.description) lines.push(`- Description: ${p.description}`);
+    if (p.features.length) lines.push(`- Features: ${p.features.join("; ")}`);
     if (p.applications.length) lines.push(`- Applications: ${p.applications.join(", ")}`);
     if (p.certifications.length) lines.push(`- Certifications: ${p.certifications.join(", ")}`);
+    if (p.images.length) lines.push(`- Images: ${p.images.length} image(s)`);
     if (p.specifications.length) {
       lines.push("", "### Specifications");
       for (const s of p.specifications) lines.push(`- ${s.label}: ${s.value}`);
