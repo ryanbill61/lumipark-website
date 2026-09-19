@@ -10,12 +10,13 @@ const app = new Hono();
 installBloomeBridge(app);
 
 const ADMIN_USERNAME = "admin";
-const SITE_EMAIL = "monica@bmclighting.com";
-const SITE_NAME = "BMC Lighting";
+const SITE_EMAIL = "ryan@lumiparkgroup.com";
+const SITE_NAME = "LumiPark Group";
 // Brand's own domain is verified in Resend + has a real mailbox now.
-const FROM_EMAIL = "monica@bmclighting.com";
+const FROM_EMAIL = "ryan@lumiparkgroup.com";
 // Real inbox that receives the internal notification.
-const NOTIFY_EMAIL = "monica@bmclighting.com";
+const NOTIFY_EMAIL = "ryan@lumiparkgroup.com";
+const SITE_RATE_KEY = "hub"; // per-site rate-limit dimension
 const SESSION_COOKIE = "admin_session";
 
 function adminPassword(): string {
@@ -151,10 +152,10 @@ app.post("/api/public/leads", async (c) => {
   const email = typeof data.email === "string" ? data.email.trim() : "";
 
   // Record every attempt (rate counter, shared across edge instances).
-  await db.insert(leadRate).values({ kind: "lead", ip, email: email || "invalid" });
+  await db.insert(leadRate).values({ kind: `lead:${SITE_RATE_KEY}`, ip, email: email || "invalid" });
 
   // 1) IP rate limit — first, before honeypot, so honeypot probes also count.
-  if ((await rateCountByIp("lead", ip, 60_000)) > 5) {
+  if ((await rateCountByIp(`lead:${SITE_RATE_KEY}`, ip, 60_000)) > 5) {
     return c.json({ error: "Too many requests" }, 429);
   }
 
@@ -166,7 +167,7 @@ app.post("/api/public/leads", async (c) => {
   if (!email) return c.json({ error: "Email is required" }, 400);
 
   // 3) Email rate limit — second dimension.
-  if ((await rateCount("lead", ip, email, 60_000)) > 5) {
+  if ((await rateCount(`lead:${SITE_RATE_KEY}`, ip, email, 60_000)) > 5) {
     return c.json({ error: "Too many requests" }, 429);
   }
 
@@ -189,7 +190,7 @@ app.post("/api/public/leads", async (c) => {
   try {
     [lead] = await db
       .insert(leads)
-      .values({ brand: "BMC", ip, emailStatus: capped ? "rate_limited" : "pending", ...leadData })
+      .values({ brand: "HUB", ip, emailStatus: capped ? "rate_limited" : "pending", ...leadData })
       .returning();
   } catch (e) {
     return c.json({ error: "DB: " + (e instanceof Error ? e.message : String(e)) }, 500);
@@ -255,7 +256,7 @@ async function loginFailCount(ip: string): Promise<number> {
   const rows = await db
     .select({ id: leadRate.id })
     .from(leadRate)
-    .where(and(eq(leadRate.kind, "login"), eq(leadRate.ip, ip), gte(leadRate.createdAt, cutoff)))
+    .where(and(eq(leadRate.kind, `login:${SITE_RATE_KEY}`), eq(leadRate.ip, ip), gte(leadRate.createdAt, cutoff)))
     .limit(100);
   return rows.length;
 }
@@ -267,12 +268,12 @@ app.post("/api/public/admin/login", async (c) => {
   }
   const body = await c.req.json().catch(() => ({}));
   if (body.username === ADMIN_USERNAME && body.password === adminPassword()) {
-    await db.delete(leadRate).where(and(eq(leadRate.kind, "login"), eq(leadRate.ip, ip)));
+    await db.delete(leadRate).where(and(eq(leadRate.kind, `login:${SITE_RATE_KEY}`), eq(leadRate.ip, ip)));
     const token = await signSession();
     c.header("Set-Cookie", setSessionCookie(token, 604800));
     return c.json({ ok: true });
   }
-  await db.insert(leadRate).values({ kind: "login", ip, email: "admin" });
+  await db.insert(leadRate).values({ kind: `login:${SITE_RATE_KEY}`, ip, email: "admin" });
   return c.json({ ok: false, error: "Invalid credentials" }, 401);
 });
 
