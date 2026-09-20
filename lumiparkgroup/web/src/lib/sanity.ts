@@ -98,7 +98,7 @@ export async function fetchFeaturedProducts(): Promise<Product[]> {
   }
 }
 
-export type SiteSettings = Record<string, string | null | undefined>;
+export type SiteSettings = Record<string, any>;
 
 export async function fetchSiteSettings(site: string): Promise<SiteSettings | null> {
   try {

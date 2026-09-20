@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
 const heroFields = (
   h1: string,
@@ -65,6 +65,71 @@ export const hubSettings = defineType({
     defineField({ name: 'brands_copy', title: '品牌分流文案', type: 'text', group: 'sections', rows: 3, initialValue: 'A hand-picked selection from our brands. Full catalogs, specs and IES downloads live on each brand site.' }),
     defineField({ name: 'terms_h2', title: 'B2B 条款 H2', type: 'string', group: 'sections', initialValue: 'Engineered spec sheets, not shopping carts.' }),
     defineField({ name: 'terms_copy', title: 'B2B 条款文案', type: 'text', group: 'sections', rows: 3, initialValue: 'Every product ships with a structured Ordering Information table — wattage variants, photometric specs, and IES / spec-sheet downloads for contractors and designers.' }),
+    defineField({
+      name: 'stats',
+      title: '规模数字（Stats）',
+      type: 'array',
+      group: 'sections',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'stat',
+          fields: [
+            defineField({ name: 'value', title: '数值', type: 'string' }),
+            defineField({ name: 'label', title: '标签', type: 'string' }),
+          ],
+        }),
+      ],
+      initialValue: [
+        { value: '3', label: 'Specialized lighting industrial parks' },
+        { value: '100,000 m²', label: 'Total park & facility area' },
+        { value: '50+', label: 'Resident partner factories' },
+        { value: '30+', label: 'Years in manufacturing' },
+      ],
+    }),
+    defineField({
+      name: 'ecosystem_cards',
+      title: '生态卡片（Ecosystem）',
+      type: 'array',
+      group: 'sections',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'ecosystem_card',
+          fields: [
+            defineField({ name: 'title', title: '标题', type: 'string' }),
+            defineField({ name: 'body', title: '正文', type: 'text', rows: 3 }),
+          ],
+        }),
+      ],
+      initialValue: [
+        { title: 'Source your whole BOM inside one cluster', body: 'Drivers, optics, housings and boards are all made in the parks, so you pay factory prices without the middleman freight legs.' },
+        { title: 'Mix categories in one container', body: 'Indoor, outdoor, industrial and components ship together. When one line is full, we move the order to a sister factory — your roll-out doesn\u2019t wait.' },
+        { title: 'Same QC on every factory, ours or not', body: 'IQC → in-process → 100% aging → photometric sampling → OQC. The resident factories run it too, or they don\u2019t stay in the park.' },
+      ],
+    }),
+    defineField({
+      name: 'manufacturing_cards',
+      title: '制造卡片（Manufacturing）',
+      type: 'array',
+      group: 'sections',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'manufacturing_card',
+          fields: [
+            defineField({ name: 'title', title: '标题', type: 'string' }),
+            defineField({ name: 'body', title: '正文', type: 'text', rows: 3 }),
+          ],
+        }),
+      ],
+      initialValue: [
+        { title: '2 R&D centers, 40+ engineers', body: 'Optics, thermals, drivers and smart controls designed in-house.' },
+        { title: 'In-house photometric lab', body: 'Integrating sphere + goniophotometer — IES/LDT files issued with every quote.' },
+        { title: '100% aging test', body: '4–8 h burn-in on every luminaire before packing, no sampling shortcuts.' },
+        { title: 'Vertical chain on-site', body: 'Die-casting, CNC, powder coating, SMT and assembly within the parks.' },
+      ],
+    }),
     ...footerFields,
     ...seoFields,
   ],

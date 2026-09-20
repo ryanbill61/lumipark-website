@@ -8,6 +8,16 @@ import type { SiteSettings } from "@/lib/sanity";
 
 const TRUST = ["UL", "ETL", "DLC", "Energy Star", "FCC", "RoHS", "ISO 9001"];
 
+const STATS = [
+  { value: "3", label: "Specialized lighting industrial parks" },
+  { value: "100,000 m²", label: "Total park & facility area" },
+  { value: "50+", label: "Resident partner factories" },
+  { value: "30+", label: "Years in manufacturing" },
+];
+
+type StatItem = { value?: string; label?: string };
+type CardItem = { title?: string; body?: string };
+
 const ECOSYSTEM = [
   {
     title: "Source your whole BOM inside one cluster",
@@ -108,10 +118,9 @@ export default function Home() {
             lead="Owning the parks — not just a factory — means capacity and product-line breadth are not constraints for your program."
           />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
-            <Stat value="3" label="Specialized lighting industrial parks" />
-            <Stat value="100,000 m²" label="Total park & facility area" />
-            <Stat value="50+" label="Resident partner factories" />
-            <Stat value="30+" label="Years in manufacturing" />
+            {((settings?.stats as StatItem[] | undefined) || STATS).map((s) => (
+              <Stat key={s.label} value={s.value || ""} label={s.label || ""} />
+            ))}
           </div>
         </div>
       </section>
@@ -123,7 +132,7 @@ export default function Home() {
           title="Landlord, manufacturer, and the brand on the box — all us."
         />
         <div className="grid md:grid-cols-3 gap-4">
-          {ECOSYSTEM.map((e) => (
+          {((settings?.ecosystem_cards as CardItem[] | undefined) || ECOSYSTEM).map((e) => (
             <div key={e.title} className="bg-bone p-8 rounded-xl shadow-sm border border-[#E0E7ED]">
               <h3 className="text-lg font-semibold mb-3">{e.title}</h3>
               <p className="text-ink-soft leading-relaxed">{e.body}</p>
@@ -141,7 +150,7 @@ export default function Home() {
             "Direct from our own factories — 50+ facilities across three wholly-owned industrial parks, giving you direct control over quality and lead times. Our own lines run the volume and hero SKUs; the surrounding park ecosystem covers the long tail — all under one QC regime."}
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {MANUFACTURING.map((m) => (
+          {((settings?.manufacturing_cards as CardItem[] | undefined) || MANUFACTURING).map((m) => (
             <div key={m.title} className="bg-bone p-8 rounded-xl shadow-sm border border-[#E0E7ED]">
               <h3 className="text-lg font-semibold mb-3">{m.title}</h3>
               <p className="text-ink-soft leading-relaxed">{m.body}</p>
