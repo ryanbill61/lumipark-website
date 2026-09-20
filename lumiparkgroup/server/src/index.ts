@@ -450,12 +450,17 @@ app.post("/api/public/dify/chat", async (c) => {
 
   // PDP context: inject the product's authoritative data directly into the prompt (not reliant on KB retrieval).
   const productContext = productSlug ? await productContextFor(productSlug) : "";
+  const BRAND_GUIDE =
+    "LumiPark Group has two brands: BMC (commercial/engineering lighting — bmclighting.com) and LEAPPON (decorative home lighting — leappon.com). " +
+    "If a customer asks about a brand or product that does not belong to this site, proactively name the correct brand and point them to its site (bmclighting.com or leappon.com), then guide them to leave an inquiry.";
   const brandHint =
-    SITE_RATE_KEY === "bmc"
-      ? "You are on the BMC Lighting website (commercial/industrial lighting). Focus on BMC products; do not mention LEAPPON home/decorative lighting."
+    (SITE_RATE_KEY === "bmc"
+      ? "You are on the BMC Lighting website (commercial/industrial lighting). Focus on BMC products; do not pitch LEAPPON home/decorative lighting."
       : SITE_RATE_KEY === "leappon"
-        ? "You are on the LEAPPON website (decorative home lighting). Focus on LEAPPON products; do not mention BMC commercial lighting."
-        : "You are on the LumiPark Group hub — you may cover both BMC and LEAPPON.";
+        ? "You are on the LEAPPON website (decorative home lighting). Focus on LEAPPON products; do not pitch BMC commercial lighting."
+        : "You are on the LumiPark Group hub — you may cover both BMC and LEAPPON.") +
+    " " +
+    BRAND_GUIDE;
   const fullQuery = productContext
     ? `Product data for the current page (authoritative — answer using it, do not say you lack the specs):\n${productContext}\n\n${brandHint}\n\nUser question: ${query}`
     : `${brandHint}\n\nUser question: ${query}`;

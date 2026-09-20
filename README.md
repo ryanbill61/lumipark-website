@@ -24,5 +24,11 @@
 - 线上部署唯一执行人 = Mike（EdgeSpark 串行单线）。
 - 品牌邮箱：母舰 ryan@lumiparkgroup.com / BMC monica@bmclighting.com / LEAPPON ryan@leappon.com
 
+## AI 客服（Dify）架构
+- **三站共用同一个 Dify 应用 + 一份全量知识库**（母舰 147 款含 BMC + LEAPPON）。
+- 每站通过**服务端注入**区分：`site`（hub/bmc/leappon）+ PDP 的 `productSlug` + 品牌口径提示词，做「软约束」隔离。
+- **元数据硬过滤不上**（代价：丢掉 URL 自动同步、改手工上传+打标签；且 LEAPPON 仅 2 款会哑火）。
+- 决策记录：**未来若上硬过滤，只可能给 BMC 上；LEAPPON 永不过滤**（产品少，靠 prompt 兜）。
+
 ## 备份
 - 每月 1 号 10:00（北京时间）打包（含 PII leads），存本地/群工作区，**不推 Git**。
