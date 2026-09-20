@@ -80,7 +80,7 @@ export default function Home() {
 
       {/* Numbered Systems */}
       <section className="max-w-7xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-10">Our Systems</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-10">{settings?.systems_h2 || "Our Systems"}</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {SYSTEMS.map((s) => (
             <Link
@@ -104,7 +104,7 @@ export default function Home() {
       <section className="bg-white border-y border-[#D1D1D1]">
         <div className="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24">
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-            Engineered for the demanding space.
+            {settings?.apps_h2 || "Engineered for the demanding space."}
           </h2>
           <div className="mt-10 grid md:grid-cols-3 gap-8">
             {APPLICATIONS.map((a) => (
@@ -119,7 +119,7 @@ export default function Home() {
 
       {/* Resources */}
       <section className="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24">
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Technical Resources</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{settings?.downloads_h2 || "Technical Resources"}</h2>
         <p className="mt-3 text-sm text-ink-soft max-w-xl">
           Everything you need for lighting calculation and project specification.
         </p>
@@ -140,8 +140,8 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-5 md:px-8 pb-16 md:pb-24">
         <div className="bg-white border border-[#D1D1D1] p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Get a Factory Quote</h2>
-            <p className="mt-2 text-sm text-ink-soft">Volume pricing for verified partners.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{settings?.quote_h2 || "Get a Factory Quote"}</h2>
+            <p className="mt-2 text-sm text-ink-soft">{settings?.quote_copy || "Volume pricing for verified partners."}</p>
           </div>
           <Link
             to="/contact"

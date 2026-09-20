@@ -85,13 +85,10 @@ export default function Home() {
       {/* Brand story */}
       <section className="max-w-3xl mx-auto px-5 md:px-8 pb-20 text-center">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-ink">
-          Designed for the way we live
+          {settings?.story_h2 || "Designed for the way we live"}
         </h2>
         <p className="mt-5 text-ink-soft leading-relaxed">
-          LEAPPON is the home-lighting line of LumiPark Group — a lighting
-          supply chain built on our own factories and industrial parks. We pair
-          honest engineering with a warm, human aesthetic, so the light in your
-          home feels as good as it looks.
+          {settings?.story_copy || "LEAPPON is the home-lighting line of LumiPark Group — a lighting supply chain built on our own factories and industrial parks. We pair honest engineering with a warm, human aesthetic, so the light in your home feels as good as it looks."}
         </p>
         <Link
           to="/contact"
