@@ -50,8 +50,8 @@ export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   useEffect(() => {
-    fetchFeaturedProducts().then(setFeatured);
-    fetchSiteSettings("hub").then(setSettings);
+    fetchFeaturedProducts().then(setFeatured).catch(() => {});
+    fetchSiteSettings("hub").then(setSettings).catch(() => setSettings(null));
   }, []);
   return (
     <div>
@@ -136,8 +136,9 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-28">
         <SectionHeading
           kicker="Manufacturing Power"
-          title="Core products, built in-house. Everything else, built next door."
-          lead="Direct from our own factories — 50+ facilities across three wholly-owned industrial parks, giving you direct control over quality and lead times. Our own lines run the volume and hero SKUs; the surrounding park ecosystem covers the long tail — all under one QC regime."
+          title={settings?.mfg_h2 || "Core products, built in-house. Everything else, built next door."}
+          lead={settings?.mfg_lead ||
+            "Direct from our own factories — 50+ facilities across three wholly-owned industrial parks, giving you direct control over quality and lead times. Our own lines run the volume and hero SKUs; the surrounding park ecosystem covers the long tail — all under one QC regime."}
         />
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {MANUFACTURING.map((m) => (
@@ -153,8 +154,9 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-5 md:px-8 py-20 md:py-28">
         <SectionHeading
           kicker="Featured & New"
-          title="A curated look at what we make."
-          lead="A hand-picked selection from our brands. Full catalogs, specs and IES downloads live on each brand site."
+          title={settings?.brands_h2 || "A curated look at what we make."}
+          lead={settings?.brands_copy ||
+            "A hand-picked selection from our brands. Full catalogs, specs and IES downloads live on each brand site."}
         />
         {featured.length === 0 ? (
           <div className="grid md:grid-cols-2 gap-4">
@@ -203,11 +205,11 @@ export default function Home() {
           <div>
             <div className="tabular text-xs uppercase tracking-[0.22em] text-steel mb-3">Products</div>
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
-              Engineered spec sheets, not shopping carts.
+              {settings?.terms_h2 || "Engineered spec sheets, not shopping carts."}
             </h2>
             <p className="mt-3 text-ink-soft max-w-xl">
-              Every product ships with a structured Ordering Information table — wattage variants,
-              photometric specs, and IES / spec-sheet downloads for contractors and designers.
+              {settings?.terms_copy ||
+                "Every product ships with a structured Ordering Information table — wattage variants, photometric specs, and IES / spec-sheet downloads for contractors and designers."}
             </p>
           </div>
           <Link
