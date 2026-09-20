@@ -39,4 +39,5 @@
 - 质保：**5 年**标准质保
 - 贸易条款：**EXW / FOB / CIF / DDP**
 - 测试标准：**LM-79 / LM-80**
-- ⚠️ TODO：交期（lead time）/ 打样政策 / 认证支持细节
+- 交期（lead time）：**Confirmed per model and order quantity — not published**（按型号与数量确认，owner 决定不对外公布固定数字）
+- ⚠️ TODO：打样政策 / 认证支持细节

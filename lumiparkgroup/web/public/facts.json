@@ -65,10 +65,10 @@
     "testing": [
       "LM-79",
       "LM-80"
-    ]
+    ],
+    "lead_time": "Confirmed per model and order quantity — not published"
   },
   "todo": [
-    "交期（lead time）",
     "认证编号/范围/原文",
     "年产能/研发中心与工程师数/园区地址",
     "打样流程/政策/案例"
