@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "node ../../tools/prerender.mjs --domain lumiparkgroup.com --site \"LumiPark Group\""
+    "postbuild": "node ../../tools/prerender.mjs --domain lumiparkgroup.com --site \"LumiPark Group\" && node ../../tools/inject-meta.mjs hub"
   },
   "dependencies": {
     "@edgespark/web": ">=0.0.1 <1.0.0",

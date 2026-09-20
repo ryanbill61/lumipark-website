@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "node ../../tools/prerender.mjs --domain leappon.com --site \"LEAPPON\" --brand LEAPPON"
+    "postbuild": "node ../../tools/prerender.mjs --domain leappon.com --site \"LEAPPON\" --brand LEAPPON && node ../../tools/inject-meta.mjs leappon"
   },
   "dependencies": {
     "@edgespark/web": ">=0.0.1 <1.0.0",

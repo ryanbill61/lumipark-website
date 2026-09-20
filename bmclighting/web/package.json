@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "node ../../tools/prerender.mjs --domain bmclighting.com --site \"BMC Lighting\" --brand BMC"
+    "postbuild": "node ../../tools/prerender.mjs --domain bmclighting.com --site \"BMC Lighting\" --brand BMC && node ../../tools/inject-meta.mjs bmc"
   },
   "dependencies": {
     "@edgespark/web": ">=0.0.1 <1.0.0",
